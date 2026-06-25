@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroSustentável - Simulador de Irrigação</title>
+    <style>
+        /* --- ESTILIZAÇÃO CSS --- */
+        :root {
+            --primary-color: #2e7d32;
+            --secondary-color: #81c784;
+            --dark-color: #1b5e20;
+            --light-color: #f1f8e9;
+            --text-color: #333;
+            --warning-color: #e53935;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .intro {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+
+        select, input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 2rem;
+        }
+
+        button:hover {
+            background-color: var(--dark-color);
+        }
+
+        /* --- RESULTADOS --- */
+        .result-box {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            display: none; /* Escondido até calcular */
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+
+        .efficient {
+            background-color: #e8f5e9;
+            border-left: 6px solid #4caf50;
+        }
+
+        .inefficient {
+            background-color: #ffebee;
+            border-left: 6px solid var(--warning-color);
+        }
+
+        .result-box h3 {
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+        }
+
+        .tips {
+            margin-top: 1.5rem;
+            background: #fff;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+
+        .tips h4 {
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .tips ul {
+            list-style-position: inside;
+            padding-left: 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+            font-size: 0.9rem;
+            color: #666;
+            border-top: 1px solid #ddd;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>AgroForte & Sustentável</h1>
+        <p>"Equilíbrio entre produção e meio ambiente"</p>
+    </header>
+
+    <main>
+        <div class="container">
+            <section class="intro">
+                <h2>Simulador de Consumo Hídrico</h2>
+                <p>Descubra o gasto estimado de água do seu plantio e veja como otimizar a sua produção com técnicas sustentáveis.</p>
+            </section>
+
+            <form id="simulator-form">
+                <div class="form-group">
+                    <label for="crop">1. Escolha a Cultura (Plantação):</label>
+                    <select id="crop" required>
+                        <option value="" disabled selected>Selecione uma opção...</option>
+                        <option value="soja">Soja (Necessidade média)</option>
+                        <option value="milho">Milho (Necessidade média-alta)</option>
+                        <option value="arroz">Arroz (Necessidade altíssima)</option>
+                        <option value="hortalicas">Hortaliças (Necessidade baixa-média)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="area">2. Tamanho da Área (em Hectares - ha):</label>
+                    <input type="number" id="area" min="0.1" step="0.1" placeholder="Ex: 5" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="method">3. Método de Irrigação:</label>
+                    <select id="method" required>
+                        <option value="" disabled selected>Selecione uma opção...</option>
+                        <option value="gotejamento">Gotejamento (Alta eficiência: ~95%)</option>
+                        <option value="aspersao">Aspersão Comum (Média eficiência: ~75%)</option>
+                        <option value="sulco">Inundação/Sulco (Baixa eficiência: <50%)</option>
+                    </select>
+                </div>
+
+                <button type="button" onclick="calcularImpacto()">Simular Impacto</button>
+            </form>
+
+            <div id="result" class="result-box">
+                <h3 id="result-title">Resultado da Simulação</h3>
+                <p id="result-text"></p>
+                
+                <div class="tips">
+                    <h4>🌱 Recomendações de Sustentabilidade:</h4>
+                    <ul id="recommendations-list">
+                        </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>Desenvolvido para a conscientização do Uso Responsável dos Recursos Naturais no Campo &copy; 2026</p>
+    </footer>
+
+    <script>
+        /* --- LÓGICA JAVASCRIPT --- */
+        function calcularImpacto() {
+            // Captura dos elementos do DOM
+            const crop = document.getElementById('crop').value;
+            const area = parseFloat(document.getElementById('area').value);
+            const method = document.getElementById('method').value;
+            const resultDiv = document.getElementById('result');
+            const resultTitle = document.getElementById('result-title');
+            const resultText = document.getElementById('result-text');
+            const recList = document.getElementById('recommendations-list');
+
+            // Validação simples
+            if (!crop || !area || !method) {
+                alert("Por favor, preencha todos os campos do simulador.");
+                return;
+            }
+
+            // Base teórica de consumo diário de água por hectare (valores médios fictícios em litros para o simulador)
+            let consumoBasePorHectare = 0; 
+            switch(crop) {
+                case 'soja': consumoBasePorHectare = 45000; break;
+                case 'milho': consumoBasePorHectare = 55000; break;
+                case 'arroz': consumoBasePorHectare = 90000; break;
+                case 'hortalicas': consumoBasePorHectare = 30000; break;
+            }
+
+            // Fator de desperdício baseado no método de irrigação
+            let fatorDesperdicio = 1.0;
+            if (method === 'gotejamento') fatorDesperdicio = 1.05; // 5% perda
+            if (method === 'aspersao') fatorDesperdicio = 1.35;    // 35% perda
+            if (method === 'sulco') fatorDesperdicio = 2.0;       // 100% perda (metade da água se perde)
+
+            // Cálculo final diário
+            const consumoTotalDiario = consumoBasePorHectare * area * fatorDesperdicio;
+
+            // Configuração visual do feedback (Sustentável vs Alerta)
+            resultDiv.style.display = "block";
+            recList.innerHTML = ""; // Limpa dicas anteriores
+
+            if (method === 'gotejamento') {
+                resultDiv.className = "result-box efficient";
+                resultTitle.innerText = "⚡ Excelente Gestão Hídrica!";
+                resultText.innerHTML = `Seu gasto estimado é de <strong>${consumoTotalDiario.toLocaleString('pt-BR')} litros</strong> de água por dia.<br>O método escolhido minimiza a evaporação e foca diretamente nas raízes.`;
+                
+                // Dicas específicas
+                recList.innerHTML += "<li>Instale sensores de umidade no solo para irrigar apenas quando necessário.</li>";
+                recList.innerHTML += "<li>Pratique a captação de água da chuva para abastecer os reservatórios.</li>";
+            } else {
+                resultDiv.className = "result-box inefficient";
+                resultTitle.innerText = "⚠️ Alerta de Consumo Elevado";
+                resultText.innerHTML = `Seu gasto estimado é de <strong>${consumoTotalDiario.toLocaleString('pt-BR')} litros</strong> de água por dia.<br>O método de irrigação atual apresenta perdas significativas por evaporação ou escoamento superficial.`;
+                
+                // Dicas de melhoria
+                recList.innerHTML += "<li><strong>Migração de Sistema:</strong> Considere planejar a transição para microaspersão ou gotejamento para economizar até 50% de água.</li>";
+                recList.innerHTML += "<li><strong>Manejo de Horários:</strong> Irrigue nos períodos mais frios do dia (início da manhã ou fim da tarde) para reduzir a evaporação.</li>";
+                recList.innerHTML += "<li><strong>Plantio Direto:</strong> Mantenha a palhada da colheita anterior sobre o solo; isso ajuda a reter a umidade da terra por muito mais tempo.</li>";
+            }
+            
+            // Dica universal
+            recList.innerHTML += "<li>Monitore previsões meteorológicas em tempo real para evitar irrigar em dias chuvosos.</li>";
+            
+            // Rola a página suavemente até o resultado
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
